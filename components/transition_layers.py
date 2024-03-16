@@ -1,10 +1,12 @@
-# Some functions / setups were inspired from those impelmentations :
+"""
+ Some functions / setups were inspired from those impelmentations :
 
-## https://github.com/yzheng97/Point-Transformer-Cls/blob/main/
-## https://github.com/Pointcept/Pointcept
-## https://github.com/pierrefdz/point-transformer/blob/main/point_transformer_block.py
-## https://github.com/qq456cvb/Point-Transformers/blob/master/
-
+    - https://github.com/yzheng97/Point-Transformer-Cls/blob/main/
+    - https://github.com/Pointcept/Pointcept
+    - https://github.com/pierrefdz/point-transformer/blob/main/point_transformer_block.py
+    - https://github.com/qq456cvb/Point-Transformers/blob/master/
+    - https://colab.research.google.com/drive/1JqLwVHDH3N6zjSbFfWyUF7WmzqPxzAkY#scrollTo=CkCu5dj12Upg
+"""
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -74,12 +76,15 @@ class TransitionDownLayer(nn.Module):
         """
         # Farthest point sampling
         fps_idx = farthest_point_sample(xyz, self.npoint) 
+        torch.cuda.empty_cache()
         new_xyz = points_from_idx(xyz, fps_idx) 
-        
+        torch.cuda.empty_cache()
         # Find k nearest neighbors
-        dists = torch.cdist(new_xyz, xyz, p=2.0)**2
+        dists = torch.sum(((new_xyz[:, :, None] - xyz[:, None]) ** 2), dim=-1)
         idx = dists.argsort()[:, :, :self.k]  
+        torch.cuda.empty_cache()
         grouped_xyz = points_from_idx(xyz, idx) 
+        torch.cuda.empty_cache()
         
         # Extract features for each point and perform max pooling
         new_features = points_from_idx(features, idx) 
@@ -93,13 +98,13 @@ class TransitionDownLayer(nn.Module):
 
 
        
-class TransitionUpBlock(nn.Module): # we don't need it for the classifier 
-    def __init__(self, channels_in, channels_out):
-        super().__init__()
-        pass
+# class TransitionUpBlock(nn.Module): # we don't need it for the classifier 
+#     def __init__(self, channels_in, channels_out):
+#         super().__init__()
+#         pass
 
-    def forward(self, input):
-        pass
+#     def forward(self, input):
+#         pass
     
     
     

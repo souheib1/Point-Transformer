@@ -1,5 +1,5 @@
 # This loader is adapted from PointNet2 dataloaders 
-# https://github.com/yanx27/Pointnet_Pointnet2_pytorch/tree/master/data_utils
+# https://github.com/yanx27/Pointnet_Pointnet2_pytorch/blob/master/data_utils/ModelNetDataLoader.py
 
 import numpy as np
 import random

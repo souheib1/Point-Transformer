@@ -85,5 +85,5 @@ def data_loaders(ROOT_DIR = "./data/ModelNet40_PLY", transform=default_transform
 
 if __name__=="__main__":
     print("current dir ", os.getcwd())
-    ROOT_DIR = "./data/ModelNet40_PLY"
+    ROOT_DIR = "../data/ModelNet40_PLY"
     train_loader,test_loader = data_loaders(ROOT_DIR=ROOT_DIR)

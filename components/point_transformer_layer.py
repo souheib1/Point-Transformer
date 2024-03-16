@@ -1,12 +1,14 @@
-# Some functions / setups were inspired from those impelmentations :
+"""
+ Some functions / setups were inspired from those impelmentations :
 
-## https://github.com/yzheng97/Point-Transformer-Cls/blob/main/
-## https://github.com/Pointcept/Pointcept
-## https://github.com/POSTECH-CVLab/point-transformer
-
-# Query/Key and Value vectors are supposed to have the same dimention as the embedding (as in the original paper)
-# Each point attend to its local neighborhood (knn)
-
+    - https://github.com/yzheng97/Point-Transformer-Cls/blob/main/  
+    - https://github.com/Pointcept/Pointcept
+    - https://github.com/POSTECH-CVLab/point-transformer
+    - https://colab.research.google.com/drive/1JqLwVHDH3N6zjSbFfWyUF7WmzqPxzAkY?usp=sharing
+    
+- Query/Key and Value vectors are supposed to have the same dimention as the embedding (as in the original paper)
+- Each point attend to its local neighborhood (knn)
+"""
 import torch 
 import torch.nn as nn
 import numpy as np
@@ -53,11 +55,12 @@ class PointTransformerLayer(nn.Module):
     def forward(self, coordinates, features):
         
         # Local Attetion 
-        dists = torch.cdist(coordinates, coordinates, p=2.0)**2  # Compute pairwise squared euclidean distance 
+        dists = torch.sum((coordinates[:, :, None] - coordinates[:, None]) ** 2, dim=-1)  # Compute pairwise squared euclidean distance 
         knn_idx = dists.argsort()[:, :, :self.k]  # Get indices of nearest neighbors 
         knn_coords = points_from_idx(coordinates, knn_idx)  # Gather coordinates of nearest neighbors 
         #print(knn_coords.shape)
         
+        before = features
         x = self.linear1(features) 
         # Compute queries, keys, and values
         q = self.queries(x)  
@@ -74,7 +77,7 @@ class PointTransformerLayer(nn.Module):
         out = torch.einsum('bmnf,bmnf->bmf', attention, v + pos_enc)  # apply attention to values 
 
         out = self.linear2(out)  # final linear transformation
-        out += features # add residual connection 
+        out += before # add residual connection 
         return out, attention
 
 
