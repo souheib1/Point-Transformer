@@ -58,15 +58,12 @@ class TransitionDownLayer(nn.Module):
         self.npoint = npoint
         self.k = k
         
-        # MLP layers for processing point features
-        self.mlp_convs = nn.ModuleList([
-            nn.Conv2d(input_dim, output_dim, 1),
-            nn.Conv2d(output_dim, output_dim, 1)
-        ])
-        self.mlp_bns = nn.ModuleList([
-            nn.BatchNorm2d(output_dim),
-            nn.BatchNorm2d(output_dim)
-        ])
+        # MLP layers for processing point features 
+        self.mlp_convs = nn.Sequential(
+            nn.Conv1d(input_dim, output_dim, 1),
+            nn.BatchNorm1d(output_dim),
+            nn.ReLU()
+        )
         
     def forward(self, xyz, features):
         """
@@ -76,24 +73,19 @@ class TransitionDownLayer(nn.Module):
         """
         # Farthest point sampling
         fps_idx = farthest_point_sample(xyz, self.npoint) 
-        torch.cuda.empty_cache()
         new_xyz = points_from_idx(xyz, fps_idx) 
         torch.cuda.empty_cache()
         # Find k nearest neighbors
         dists = torch.sum(((new_xyz[:, :, None] - xyz[:, None]) ** 2), dim=-1)
         idx = dists.argsort()[:, :, :self.k]  
         torch.cuda.empty_cache()
-        grouped_xyz = points_from_idx(xyz, idx) 
-        torch.cuda.empty_cache()
         
         # Extract features for each point and perform max pooling
-        new_features = points_from_idx(features, idx) 
-        new_features = new_features.permute(0, 3, 2, 1) 
-        for i, conv in enumerate(self.mlp_convs):
-            bn = self.mlp_bns[i]
-            new_features =  F.relu(bn(conv(new_features)))
-        new_features, _ = torch.max(new_features, 2)
-        new_features = new_features.transpose(1,2)
+        new_features = features.transpose(1,2) 
+        new_features = self.mlp_convs(new_features) 
+        new_features = new_features.transpose(1,2) 
+        grouped_features = points_from_idx(new_features, idx) 
+        new_features, _ = torch.max(grouped_features, 2) 
         return new_xyz, new_features
 
 
@@ -112,12 +104,16 @@ if __name__=="__main__":
     # test the transition down layer
     batch_size = 16
     nb_points = 1024
-    input_dim = 32
-    layer = TransitionDownLayer(npoint=nb_points//2, k=16, input_dim=input_dim, output_dim=input_dim*2)
+    dim_in = 10
+    layer = TransitionDownLayer(npoint=nb_points//2, k=16, input_dim=dim_in, output_dim=dim_in*2)
     coords = torch.rand((batch_size, nb_points, 3))
-    features = torch.rand((batch_size, nb_points, input_dim))
+    features = torch.rand((batch_size, nb_points, dim_in))
+    print("\t batch_size=",batch_size)
+    print("\t dim_in=",dim_in)
+    print("\t N_points=",nb_points)
     print('Input features shape: ', features.shape)
     print('Output coordinates shape (batch size, number of points, coordinates dimension) : ', 
             layer.forward(coords, features)[0].shape)
-    print('Output features shape (batch size, number of points, features dimension) : ', layer.forward(coords, features)[1].shape)    
+    print('Output features shape (batch size, number of points, features dimension) : ',
+          layer.forward(coords, features)[1].shape)    
     
