@@ -1,21 +1,57 @@
-# Some functions are adapted from TP6
+# This loader is adapted from PointNet2 dataloaders 
+# https://github.com/yanx27/Pointnet_Pointnet2_pytorch/blob/master/data_utils/ModelNetDataLoader.py
 
 import numpy as np
 import random
-import math
+import pickle
 import os
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-from utils import write_ply, read_ply
-import sys
+from tqdm import tqdm
 
+
+def pc_normalize(pc):
+    """
+    Normalize the point cloud
+    Input:
+        pc: pointcloud data, [N, D]
+    """
+    centroid = np.mean(pc, axis=0)
+    pc = pc - centroid
+    m = np.max(np.sqrt(np.sum(pc**2, axis=1)))
+    pc = pc / m
+    return pc
+
+
+def farthest_point_sample(pc, n_sample):
+    """
+    Input:
+        pc: pointcloud data, [N, D]
+        n_sample: number of samples
+    Return:
+        centroids: sampled pointcloud index, [n_sample, D]
+    """
+    N, D = pc.shape
+    xyz = pc[:, :3]
+    centroids = np.zeros((n_sample,))
+    distance = np.ones((N,)) * 1e10
+    farthest = np.random.randint(0, N)
+    for i in range(n_sample):
+        centroids[i] = farthest
+        centroid = xyz[farthest, :]
+        dist = np.sum((xyz - centroid) ** 2, -1)
+        mask = dist < distance
+        distance[mask] = dist[mask]
+        farthest = np.argmax(distance, -1)
+    pc = pc[centroids.astype(np.int32)]
+    return pc
 
 class RandomRotation_z(object):
     def __call__(self, pointcloud):
-        theta = random.random() * 2. * math.pi
-        rot_matrix = np.array([[ math.cos(theta), -math.sin(theta),      0],
-                               [ math.sin(theta),  math.cos(theta),      0],
+        theta = random.random() * 2. * np.pi
+        rot_matrix = np.array([[np.cos(theta), -np.sin(theta),      0],
+                               [np.sin(theta),  np.cos(theta),      0],
                                [0,                               0,      1]])
         rot_pointcloud = rot_matrix.dot(pointcloud.T).T
         return rot_pointcloud
@@ -27,63 +63,153 @@ class RandomNoise(object):
         noisy_pointcloud = pointcloud + noise
         return noisy_pointcloud
 
-     
-class ToTensor(object):
+
+class ShufflePoints(object):
     def __call__(self, pointcloud):
-        return torch.from_numpy(pointcloud)
+        np.random.shuffle(pointcloud)
+        return pointcloud
 
 
 def default_transforms():
-    return transforms.Compose([RandomRotation_z(),RandomNoise(),ToTensor()])
+    return transforms.Compose([RandomRotation_z(), RandomNoise()])
 
 
-def test_transforms():
-    return transforms.Compose([ToTensor()])
+class ModelNetDataLoader(Dataset):
+    def __init__(self, root, num_point=1024, transforms=default_transforms(), use_uniform_sample=True, use_normals=True,
+                 num_category=40, split='train', process_data=False):
+        self.root = root
+        self.n_sample = num_point
+        self.process_data = process_data
+        self.uniform = use_uniform_sample
+        self.use_normals = use_normals
+        self.num_category = num_category
+        self.transforms = transforms
 
+        if self.num_category == 10:
+            self.catfile = os.path.join(
+                self.root, 'modelnet10_shape_names.txt')
+        else:
+            self.catfile = os.path.join(
+                self.root, 'modelnet40_shape_names.txt')
 
-class PointCloudData_RAM(Dataset):
-    def __init__(self, root_dir, folder="train", transform=default_transforms()):
-        self.root_dir = root_dir
-        folders = [dir for dir in sorted(os.listdir(root_dir)) if os.path.isdir(root_dir+"/"+dir)]
-        self.classes = {folder: i for i, folder in enumerate(folders)}
-        self.transforms = transform
-        self.data = []
-        for category in self.classes.keys():
-            new_dir = root_dir+"/"+category+"/"+folder
-            for file in os.listdir(new_dir):
-                if file.endswith('.ply'):
-                    ply_path = new_dir+"/"+file
-                    data = read_ply(ply_path)
-                    sample = {}
-                    sample['pointcloud'] = np.vstack((data['x'], data['y'], data['z'])).T
-                    sample['category'] = self.classes[category]
-                    self.data.append(sample)
+        self.cat = [line.rstrip() for line in open(self.catfile)]
+        self.classes = dict(zip(self.cat, range(len(self.cat))))
+
+        shape_ids = {}
+        if self.num_category == 10:
+            shape_ids['train'] = [line.rstrip() for line in open(
+                os.path.join(self.root, 'modelnet10_train.txt'))]
+            shape_ids['test'] = [line.rstrip() for line in open(
+                os.path.join(self.root, 'modelnet10_test.txt'))]
+        else:
+            shape_ids['train'] = [line.rstrip() for line in open(
+                os.path.join(self.root, 'modelnet40_train.txt'))]
+            shape_ids['test'] = [line.rstrip() for line in open(
+                os.path.join(self.root, 'modelnet40_test.txt'))]
+
+        assert (split == 'train' or split == 'test')
+        shape_names = ['_'.join(x.split('_')[0:-1]) for x in shape_ids[split]]
+        self.datapath = [(shape_names[i], os.path.join(self.root, shape_names[i], shape_ids[split][i]) + '.txt') for i
+                         in range(len(shape_ids[split]))]
+        print('The size of %s data is %d' % (split, len(self.datapath)))
+
+        if self.uniform:
+            self.save_path = os.path.join(root, 'modelnet%d_%s_%dpts_fps.dat' % (
+                self.num_category, split, self.n_sample))
+        else:
+            self.save_path = os.path.join(root, 'modelnet%d_%s_%dpts.dat' % (
+                self.num_category, split, self.n_sample))
+
+        if self.process_data:
+            if not os.path.exists(self.save_path):
+                print('Processing data %s (only running in the first time)...' %
+                      self.save_path)
+                self.list_of_points = [None] * len(self.datapath)
+                self.list_of_labels = [None] * len(self.datapath)
+
+                for index in tqdm(range(len(self.datapath)), total=len(self.datapath), position=0, leave=True):
+                    fn = self.datapath[index]
+                    cls = self.classes[self.datapath[index][0]]
+                    cls = np.array([cls]).astype(np.int32)
+                    point_set = np.loadtxt(
+                        fn[1], delimiter=',').astype(np.float32)
+
+                    if self.uniform:
+                        point_set = farthest_point_sample(
+                            point_set, self.n_sample)
+                    else:
+                        point_set = point_set[0:self.n_sample, :]
+
+                    self.list_of_points[index] = point_set
+                    self.list_of_labels[index] = cls
+
+                with open(self.save_path, 'wb') as f:
+                    pickle.dump([self.list_of_points, self.list_of_labels], f)
+            else:
+                print('Load processed data from %s...' % self.save_path)
+                with open(self.save_path, 'rb') as f:
+                    self.list_of_points, self.list_of_labels = pickle.load(f)
 
     def __len__(self):
-        return len(self.data)
+        return len(self.datapath)
 
-    def __getitem__(self, idx):
-        pointcloud = self.transforms(self.data[idx]['pointcloud'])
-        return {'pointcloud': pointcloud, 'category': self.data[idx]['category']}
+    def _get_item(self, index):
+        if self.process_data:
+            point_set, label = self.list_of_points[index], self.list_of_labels[index]
+            point_set[:, 0:3] = pc_normalize(point_set[:, 0:3])
+        else:
+            fn = self.datapath[index]
+            cls = self.classes[self.datapath[index][0]]
+            label = np.array([cls]).astype(np.int32)
+            point_set = np.loadtxt(fn[1], delimiter=',').astype(np.float32)
 
+            if self.uniform:
+                point_set = farthest_point_sample(point_set, self.n_sample)
+            else:
+                point_set = point_set[0:self.n_sample, :]
 
-def data_loaders(ROOT_DIR = "./data/ModelNet40_PLY", transform=default_transforms(), batch_size=32,verbose=True):
+        if not self.use_normals:
+            point_set = point_set[:, 0:3]
+
+        if self.transforms is not None:
+            point_set[:, 0:3] = self.transforms(point_set[:, 0:3])
+
+        return point_set, label[0]
+
+    def __getitem__(self, index):
+        return self._get_item(index)
+
+def data_loaders(ROOT_DIR = "./data/modelnet40_normal_resampled/", batch_size=16):
     print("current dir ", os.getcwd())
-    train_ds = PointCloudData_RAM(ROOT_DIR, folder='train', transform=transform)
-    test_ds = PointCloudData_RAM(ROOT_DIR, folder='test', transform=transform)
-    inv_classes = {i: cat for cat, i in train_ds.classes.items()}
-    if verbose:
-        print("Classes: ", inv_classes)
-        print('Train dataset size: ', len(train_ds))
-        print('Test dataset size: ', len(test_ds))
-        print('Number of classes: ', len(train_ds.classes))
-        print('Sample pointcloud shape: ', train_ds[0]['pointcloud'].size())
-    train_loader = DataLoader(dataset=train_ds, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(dataset=test_ds, batch_size=batch_size)
-    return(train_loader,test_loader)
+    train_data = ModelNetDataLoader(root=ROOT_DIR, 
+                          num_category=40,
+                          split='train', 
+                          process_data=True,
+                          transforms=None)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
+    test_data = ModelNetDataLoader(root=ROOT_DIR,  
+                          num_category=40,
+                          split='test', 
+                          process_data=True,
+                          transforms=None)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True)
+    return train_loader, test_loader
 
-if __name__=="__main__":
-    print("current dir ", os.getcwd())
-    ROOT_DIR = "../data/ModelNet40_PLY"
-    train_loader,test_loader = data_loaders(ROOT_DIR=ROOT_DIR)
+if __name__ == '__main__':
+    
+    ROOT_DIR = '../data/modelnet40_normal_resampled/'
+    batch_size = 16
+    
+    train_loader, test_loader = data_loaders()
+    for point, label in train_loader:
+        print("train sample")
+        print("input_shape",point.shape)
+        print("label_shape",label.shape)
+        break
+    
+    for point, label in test_loader:
+        print("test sample")
+        print("input_shape",point.shape)
+        print("label_shape",label.shape)
+        break
