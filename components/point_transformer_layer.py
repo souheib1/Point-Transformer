@@ -35,8 +35,12 @@ class PointTransformerLayer(nn.Module):
         k (int, optional): Number of nearest neighbors to consider. Defaults to 16.
         """  
         super().__init__()
-        self.k = k 
+        self.k = k # number of neighbors
         self.linear1 = nn.Linear(dim_in, dim_out) # (d->f)
+        self.linear2 = nn.Linear(dim_out, dim_in) # (f->d)
+        self.keys = nn.Linear(dim_out, dim_out, bias=False) # psi (f->f)
+        self.queries = nn.Linear(dim_out, dim_out, bias=False) #phi (f->f)
+        self.values= nn.Linear(dim_out, dim_out, bias=False) # alpha (f->f)
         self.mapping = nn.Sequential(   #gamma (f->f)
                                     nn.Linear(dim_out, dim_out), 
                                     nn.ReLU(), 
@@ -47,14 +51,10 @@ class PointTransformerLayer(nn.Module):
                                     nn.ReLU(), 
                                     nn.Linear(dim_out, dim_out)
                                     )
-        self.keys = nn.Linear(dim_out, dim_out, bias=False) # psi (f->f)
-        self.queries = nn.Linear(dim_out, dim_out, bias=False) #phi (f->f)
-        self.values= nn.Linear(dim_out, dim_out, bias=False) # alpha (f->f)
-        self.linear2 = nn.Linear(dim_out, dim_in) # (f->d)
 
     def forward(self, coordinates, features):
         
-        # Local Attetion 
+        # Local Attetion : coordinates of nearest neighbors
         dists = torch.sum((coordinates[:, :, None] - coordinates[:, None]) ** 2, dim=-1)  # Compute pairwise squared euclidean distance 
         knn_idx = dists.argsort()[:, :, :self.k]  # Get indices of nearest neighbors 
         knn_coords = points_from_idx(coordinates, knn_idx)  # Gather coordinates of nearest neighbors 
@@ -62,16 +62,16 @@ class PointTransformerLayer(nn.Module):
         
         before = features
         x = self.linear1(features) 
+        
         # Compute queries, keys, and values
         q = self.queries(x)  
         k = points_from_idx(self.keys(x), knn_idx)  
         v = points_from_idx(self.values(x), knn_idx) 
-
         # Compute positional encoding
         pos_enc = self.positional_encoding(coordinates[:, :, None] - knn_coords)  
 
         # Compute attention
-        attention = self.mapping(q[:, :, None] - k + pos_enc) 
+        attention = self.mapping(q[:, :, None] - k + pos_enc) # compute raw attetion
         attention = torch.nn.functional.softmax(attention / np.sqrt(k.size(-1)), dim=-2) # division leads to more stable gradients.
         #print(attention.shape)
         out = torch.einsum('bmnf,bmnf->bmf', attention, v + pos_enc)  # apply attention to values 
@@ -85,14 +85,16 @@ class PointTransformerLayer(nn.Module):
 if __name__ == '__main__':
     
     print("Point Transformer Layer")
-    layer = PointTransformerLayer(dim_in=128, dim_out=3, k=16)
-    B, N, dim_in = 16, 1024, 128
-    print("\t batch_size=",B)
-    print("\t dim_in=",dim_in)
-    print("\t N_points=",N)
-    print("\t Local_Neighborhood k=",16)
-    coords = torch.rand((B, N, 3))
-    features = torch.rand((B, N, dim_in))
+    layer = PointTransformerLayer(dim_in=10, dim_out=3, k=16)
+    batch_size = 16
+    npoints = 1024 
+    dim_in = 10
+    coords = torch.rand((batch_size, npoints, 3))
+    features = torch.rand((batch_size, npoints, dim_in))
     output, attention = layer(coords, features)
+    print("\t batch_size=",batch_size)
+    print("\t dim_in=",dim_in)
+    print("\t N_points=",npoints)
+    print("\t Local_Neighborhood k=",16)
     print('New feature shape:', output.shape)
-    print('Attention shape:', attention.shape)
+

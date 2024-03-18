@@ -9,11 +9,26 @@
 """
 import torch 
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
 
 
-def farthest_point_sample(points, npoint):
+def maxPooling(features):
+    global_feature, _ = torch.max(features, 2)
+    return global_feature
+
+def meanPooling(features):
+    global_feature = torch.mean(features, 2)
+    return global_feature
+
+def points_from_idx(points, idx):
+    """
+    gather point coordianates from a set using indices.
+    """
+    raw_size = idx.size()
+    idx = idx.reshape(raw_size[0], -1)
+    res = torch.gather(points, 1, idx[..., None].expand(-1, -1, points.size(-1)))
+    return res.reshape(*raw_size, -1)
+
+def farthest_point_sample(points, npoint): # From PointNetV2
     """
     Identify a well-spread subset P2 ⊂ P1 with the requisite cardinality
     Input:
@@ -35,17 +50,8 @@ def farthest_point_sample(points, npoint):
     return centroids.to(device)
 
 
-def points_from_idx(points, idx):
-    """
-    gather point coordianates from a set using indices.
-    """
-    raw_size = idx.size()
-    idx = idx.reshape(raw_size[0], -1)
-    res = torch.gather(points, 1, idx[..., None].expand(-1, -1, points.size(-1)))
-    return res.reshape(*raw_size, -1)
-
 class TransitionDownLayer(nn.Module):
-    def __init__(self, npoint, k, input_dim, output_dim):
+    def __init__(self, npoint, k, input_dim, output_dim, pooling='max'):
         """
         Transition Down Layer 
         Input :
@@ -57,6 +63,7 @@ class TransitionDownLayer(nn.Module):
         super().__init__()
         self.npoint = npoint
         self.k = k
+        self.pooling = pooling
         
         # MLP layers for processing point features 
         self.mlp_convs = nn.Sequential(
@@ -74,18 +81,18 @@ class TransitionDownLayer(nn.Module):
         # Farthest point sampling
         fps_idx = farthest_point_sample(xyz, self.npoint) 
         new_xyz = points_from_idx(xyz, fps_idx) 
-        torch.cuda.empty_cache()
-        # Find k nearest neighbors
         dists = torch.sum(((new_xyz[:, :, None] - xyz[:, None]) ** 2), dim=-1)
-        idx = dists.argsort()[:, :, :self.k]  
+        idx = dists.argsort()[:, :, :self.k]  # Find k nearest neighbors
         torch.cuda.empty_cache()
         
-        # Extract features for each point and perform max pooling
-        new_features = features.transpose(1,2) 
-        new_features = self.mlp_convs(new_features) 
-        new_features = new_features.transpose(1,2) 
+        # Extract features for each point 
+        new_features = self.mlp_convs(features.transpose(1,2)).transpose(1,2) 
         grouped_features = points_from_idx(new_features, idx) 
-        new_features, _ = torch.max(grouped_features, 2) 
+        # Perform pooling
+        if self.pooling == 'mean':
+            new_features = meanPooling(grouped_features)
+        else : 
+            new_features = maxPooling(grouped_features)
         return new_xyz, new_features
 
 
