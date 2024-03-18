@@ -5,7 +5,7 @@ import time
 from tqdm import tqdm
 from components.loss import basic_loss
 from model import PointTransformerModel
-from components.data_loader import data_loaders
+from components.data_loader2 import data_loaders
 import matplotlib.pyplot as plt
 
 
@@ -18,13 +18,11 @@ def train(model, device, train_loader, test_loader=None, epochs=100, batch_size 
     
     if train_loader is None:
         print("load the data\n")
-        train_loader, test_loader = data_loaders(ROOT_DIR="./data/modelnet40_normal_resampled/",batch_size=batch_size)   
+        train_loader, test_loader = data_loaders(ROOT_DIR="./data/ModelNet40_PLY",batch_size=batch_size)   
     
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=1e-4)
-    print("optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=1e-4)")
-    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[120,160], gamma=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.005)
+    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[epochs*6//10,epochs*8//10], gamma=0.1)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)
-    print("    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)")
     best_test_acc = 0
     model_path = model_path
 
@@ -41,8 +39,7 @@ def train(model, device, train_loader, test_loader=None, epochs=100, batch_size 
         total_train = 0
 
         for i, data in enumerate(train_loader, 0):
-            inputs, labels = data
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels = data['pointcloud'].to(device).float(), data['category'].to(device)
             optimizer.zero_grad()
             #print(labels)
             outputs = model(inputs)
@@ -64,8 +61,7 @@ def train(model, device, train_loader, test_loader=None, epochs=100, batch_size 
         total_test = 0
     
         for data in test_loader:
-            inputs, labels = data
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels = data['pointcloud'].to(device).float(), data['category'].to(device)
             outputs = model(inputs)
             loss = basic_loss(outputs, labels)
             epoch_test_loss += loss.item()
@@ -109,7 +105,7 @@ def train(model, device, train_loader, test_loader=None, epochs=100, batch_size 
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig('./loss_accuracy_plot.png')
+    plt.savefig('./loss_accuracy_plot2.png')
     plt.show()
     
 if __name__ == "__main__":
@@ -118,13 +114,13 @@ if __name__ == "__main__":
     print("Device: ", device)
     batch_size = 16
     print("batch_size=",batch_size)
-    model = PointTransformerModel(input_dim=6).to(device)
+    model = PointTransformerModel(input_dim=3).to(device)
     t0 = time.time()
     print("load the data")
-    train_loader, test_loader = data_loaders(ROOT_DIR="./data/modelnet40_normal_resampled/",batch_size=batch_size)
+    train_loader, test_loader = data_loaders(ROOT_DIR="./data/ModelNet40_PLY/",batch_size=batch_size)
     
     train(model, device, train_loader=train_loader, 
           test_loader=test_loader, batch_size=batch_size, 
-          epochs=250, model_path='models/best_model.pt')
+          epochs=100, model_path='models/best_model2.pt')
     
     print('training time',((time.time()-t0)//60),' minutes' )
