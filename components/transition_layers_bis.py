@@ -10,6 +10,7 @@
 import torch 
 import torch.nn as nn
 from sklearn.cluster import DBSCAN
+from components.samplers import farthest_point_sample, density_based_sampling
 
 def maxPooling(features):
     global_feature, _ = torch.max(features, 2)
@@ -28,30 +29,9 @@ def points_from_idx(points, idx):
     res = torch.gather(points, 1, idx[..., None].expand(-1, -1, points.size(-1)))
     return res.reshape(*raw_size, -1)
 
-def farthest_point_sample(points, npoint): # From PointNetV2
-    """
-    Identify a well-spread subset P2 ⊂ P1 with the requisite cardinality
-    Input:
-        points: pointcloud data
-        npoint: number of samples
-    """
-    device = points.device
-    batch_size, N, _ = points.shape
-    centroids = torch.zeros(batch_size, npoint, dtype=torch.long).to(device)
-    distance = torch.ones(batch_size, N).to(device) * 1e10
-    farthest = torch.randint(0, N, (batch_size,), dtype=torch.long).to(device)
-    batch_indices = torch.arange(batch_size, dtype=torch.long).to(device)
-    for i in range(npoint):
-        centroids[:, i] = farthest
-        centroid = points[batch_indices, farthest, :].view(batch_size, 1, 3)
-        dist = torch.sum((points - centroid) ** 2, -1)
-        distance = torch.min(distance, dist)
-        farthest = torch.max(distance, -1)[1]
-    return centroids.to(device)
-
 
 class TransitionDownLayer(nn.Module):
-    def __init__(self, npoint, k, input_dim, output_dim, pooling='max'):
+    def __init__(self, npoint, k, input_dim, output_dim, pooling='max', sampling='farthest'):
         """
         Transition Down Layer 
         Input :
@@ -64,7 +44,7 @@ class TransitionDownLayer(nn.Module):
         self.npoint = npoint
         self.k = k
         self.pooling = pooling
-        
+        self.sampling = sampling
         # MLP layers for processing point features 
         self.mlp_convs = nn.Sequential(
             nn.Conv1d(input_dim, output_dim, 1),
@@ -78,8 +58,11 @@ class TransitionDownLayer(nn.Module):
             xyz: input points position data, [batch_size, N, 3]
             features: input points data, [batch_size, N, in_dim]
         """
-        # Farthest point sampling
-        fps_idx = farthest_point_sample(xyz, self.npoint) 
+        
+        if self.sampling == 'density':
+            fps_idx = density_based_sampling(xyz, self.npoint) 
+        else:
+            fps_idx = farthest_point_sample(xyz, self.npoint) 
         new_xyz = points_from_idx(xyz, fps_idx) 
         dists = torch.sum(((new_xyz[:, :, None] - xyz[:, None]) ** 2), dim=-1)
         idx = dists.argsort()[:, :, :self.k]  # Find k nearest neighbors
@@ -112,7 +95,7 @@ if __name__=="__main__":
     batch_size = 16
     nb_points = 1024
     dim_in = 10
-    layer = TransitionDownLayer(npoint=nb_points//2, k=16, input_dim=dim_in, output_dim=dim_in*2)
+    layer = TransitionDownLayer(npoint=nb_points//2, k=16, input_dim=dim_in, output_dim=dim_in*2, sampling='density')
     coords = torch.rand((batch_size, nb_points, 3))
     features = torch.rand((batch_size, nb_points, dim_in))
     print("\t batch_size=",batch_size)
