@@ -1,0 +1,317 @@
+nohup: ignoring input
+Device:  cuda:0
+batch_size= 16
+load the data
+current dir  /home/infres/sbenmabr-22/Point_Transformer
+The size of train data is 9843
+Load processed data from ./data/modelnet40_normal_resampled/modelnet40_train_1024pts_fps.dat...
+The size of test data is 2468
+Load processed data from ./data/modelnet40_normal_resampled/modelnet40_test_1024pts_fps.dat...
+Creating Model
+
+PointTransformerModel(
+  (MLP1): Sequential(
+    (0): Linear(in_features=6, out_features=32, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=32, out_features=32, bias=True)
+  )
+  (transformer_initial): PointTransformerLayer(
+    (linear1): Linear(in_features=32, out_features=64, bias=True)
+    (linear2): Linear(in_features=64, out_features=32, bias=True)
+    (keys): Linear(in_features=64, out_features=64, bias=False)
+    (queries): Linear(in_features=64, out_features=64, bias=False)
+    (values): Linear(in_features=64, out_features=64, bias=False)
+    (mapping): Sequential(
+      (0): Linear(in_features=64, out_features=64, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=64, out_features=64, bias=True)
+    )
+    (positional_encoding): Sequential(
+      (0): Linear(in_features=3, out_features=64, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=64, out_features=64, bias=True)
+    )
+  )
+  (down_blocks): ModuleList(
+    (0): TransitionDownLayer(
+      (mlp_convs): Sequential(
+        (0): Conv1d(32, 64, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+      )
+    )
+    (1): TransitionDownLayer(
+      (mlp_convs): Sequential(
+        (0): Conv1d(64, 128, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+      )
+    )
+    (2): TransitionDownLayer(
+      (mlp_convs): Sequential(
+        (0): Conv1d(128, 256, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+      )
+    )
+    (3): TransitionDownLayer(
+      (mlp_convs): Sequential(
+        (0): Conv1d(256, 512, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+      )
+    )
+    (4): TransitionDownLayer(
+      (mlp_convs): Sequential(
+        (0): Conv1d(512, 1024, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+      )
+    )
+  )
+  (transformer_blocks): ModuleList(
+    (0): PointTransformerLayer(
+      (linear1): Linear(in_features=64, out_features=64, bias=True)
+      (linear2): Linear(in_features=64, out_features=64, bias=True)
+      (keys): Linear(in_features=64, out_features=64, bias=False)
+      (queries): Linear(in_features=64, out_features=64, bias=False)
+      (values): Linear(in_features=64, out_features=64, bias=False)
+      (mapping): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (positional_encoding): Sequential(
+        (0): Linear(in_features=3, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+    )
+    (1): PointTransformerLayer(
+      (linear1): Linear(in_features=128, out_features=64, bias=True)
+      (linear2): Linear(in_features=64, out_features=128, bias=True)
+      (keys): Linear(in_features=64, out_features=64, bias=False)
+      (queries): Linear(in_features=64, out_features=64, bias=False)
+      (values): Linear(in_features=64, out_features=64, bias=False)
+      (mapping): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (positional_encoding): Sequential(
+        (0): Linear(in_features=3, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+    )
+    (2): PointTransformerLayer(
+      (linear1): Linear(in_features=256, out_features=64, bias=True)
+      (linear2): Linear(in_features=64, out_features=256, bias=True)
+      (keys): Linear(in_features=64, out_features=64, bias=False)
+      (queries): Linear(in_features=64, out_features=64, bias=False)
+      (values): Linear(in_features=64, out_features=64, bias=False)
+      (mapping): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (positional_encoding): Sequential(
+        (0): Linear(in_features=3, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+    )
+    (3): PointTransformerLayer(
+      (linear1): Linear(in_features=512, out_features=64, bias=True)
+      (linear2): Linear(in_features=64, out_features=512, bias=True)
+      (keys): Linear(in_features=64, out_features=64, bias=False)
+      (queries): Linear(in_features=64, out_features=64, bias=False)
+      (values): Linear(in_features=64, out_features=64, bias=False)
+      (mapping): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (positional_encoding): Sequential(
+        (0): Linear(in_features=3, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+    )
+    (4): PointTransformerLayer(
+      (linear1): Linear(in_features=1024, out_features=64, bias=True)
+      (linear2): Linear(in_features=64, out_features=1024, bias=True)
+      (keys): Linear(in_features=64, out_features=64, bias=False)
+      (queries): Linear(in_features=64, out_features=64, bias=False)
+      (values): Linear(in_features=64, out_features=64, bias=False)
+      (mapping): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (positional_encoding): Sequential(
+        (0): Linear(in_features=3, out_features=64, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=64, out_features=64, bias=True)
+      )
+    )
+  )
+  (MLP2): Sequential(
+    (0): Linear(in_features=1024, out_features=256, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=256, out_features=64, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=64, out_features=40, bias=True)
+  )
+)
+optimizer = madgrad.MADGRAD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=1e-4)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)
+Model training
+  0%|          | 0/250 [00:00<?, ?it/s]  0%|          | 1/250 [02:12<9:09:28, 132.40s/it]  1%|          | 2/250 [04:13<8:39:45, 125.75s/it]  1%|          | 3/250 [05:39<7:23:32, 107.74s/it]  2%|▏         | 4/250 [07:04<6:45:00, 98.78s/it]   2%|▏         | 5/250 [08:29<6:21:58, 93.55s/it]  2%|▏         | 6/250 [09:53<6:07:27, 90.36s/it]  3%|▎         | 7/250 [11:17<5:58:18, 88.47s/it]  3%|▎         | 8/250 [12:42<5:51:40, 87.19s/it]  4%|▎         | 9/250 [14:05<5:45:31, 86.02s/it]  4%|▍         | 10/250 [15:30<5:42:15, 85.56s/it]  4%|▍         | 11/250 [16:55<5:40:18, 85.43s/it]  5%|▍         | 12/250 [18:18<5:36:25, 84.81s/it]  5%|▌         | 13/250 [19:40<5:31:40, 83.97s/it]  6%|▌         | 14/250 [21:03<5:29:08, 83.68s/it]  6%|▌         | 15/250 [22:26<5:26:26, 83.35s/it]  6%|▋         | 16/250 [23:48<5:23:49, 83.03s/it]  7%|▋         | 17/250 [25:11<5:21:33, 82.81s/it]  7%|▋         | 18/250 [26:33<5:19:44, 82.69s/it]  8%|▊         | 19/250 [27:55<5:17:14, 82.40s/it]  8%|▊         | 20/250 [29:16<5:14:20, 82.00s/it]  8%|▊         | 21/250 [30:38<5:13:00, 82.01s/it]  9%|▉         | 22/250 [32:03<5:15:08, 82.93s/it]  9%|▉         | 23/250 [33:25<5:12:19, 82.55s/it] 10%|▉         | 24/250 [34:46<5:09:28, 82.16s/it] 10%|█         | 25/250 [36:07<5:07:11, 81.92s/it] 10%|█         | 26/250 [37:31<5:07:53, 82.47s/it] 11%|█         | 27/250 [38:53<5:05:46, 82.27s/it] 11%|█         | 28/250 [40:14<5:03:10, 81.94s/it] 12%|█▏        | 29/250 [41:35<5:00:36, 81.61s/it] 12%|█▏        | 30/250 [42:36<4:36:26, 75.39s/it] 12%|█▏        | 31/250 [44:08<4:53:49, 80.50s/it] 13%|█▎        | 32/250 [45:39<5:04:04, 83.69s/it] 13%|█▎        | 33/250 [46:32<4:29:44, 74.58s/it] 14%|█▎        | 34/250 [47:51<4:32:29, 75.69s/it] 14%|█▍        | 35/250 [48:48<4:11:03, 70.06s/it] 14%|█▍        | 36/250 [50:56<5:12:26, 87.60s/it] 15%|█▍        | 37/250 [53:05<5:54:45, 99.93s/it] 15%|█▌        | 38/250 [55:14<6:23:45, 108.61s/it] 16%|█▌        | 39/250 [57:23<6:43:59, 114.88s/it] 16%|█▌        | 40/250 [59:30<6:54:38, 118.47s/it] 16%|█▋        | 41/250 [1:01:34<6:58:34, 120.16s/it] 17%|█▋        | 42/250 [1:03:43<7:05:56, 122.87s/it] 17%|█▋        | 43/250 [1:05:53<7:10:45, 124.86s/it] 18%|█▊        | 44/250 [1:07:23<6:33:16, 114.55s/it] 18%|█▊        | 45/250 [1:08:47<5:59:18, 105.17s/it] 18%|█▊        | 46/250 [1:10:09<5:33:50, 98.19s/it]  19%|█▉        | 47/250 [1:11:31<5:16:24, 93.52s/it] 19%|█▉        | 48/250 [1:12:52<5:02:19, 89.80s/it] 20%|█▉        | 49/250 [1:14:15<4:54:02, 87.78s/it] 20%|██        | 50/250 [1:15:37<4:46:44, 86.02s/it] 20%|██        | 51/250 [1:16:59<4:40:36, 84.60s/it] 21%|██        | 52/250 [1:18:21<4:37:18, 84.03s/it] 21%|██        | 53/250 [1:19:44<4:34:13, 83.52s/it] 22%|██▏       | 54/250 [1:21:05<4:30:29, 82.80s/it] 22%|██▏       | 55/250 [1:22:26<4:27:36, 82.34s/it] 22%|██▏       | 56/250 [1:23:47<4:24:57, 81.94s/it] 23%|██▎       | 57/250 [1:25:08<4:22:37, 81.65s/it] 23%|██▎       | 58/250 [1:26:29<4:20:38, 81.45s/it] 24%|██▎       | 59/250 [1:27:50<4:19:16, 81.45s/it] 24%|██▍       | 60/250 [1:29:14<4:19:54, 82.08s/it] 24%|██▍       | 61/250 [1:30:36<4:18:32, 82.08s/it] 25%|██▍       | 62/250 [1:31:57<4:16:22, 81.82s/it] 25%|██▌       | 63/250 [1:33:19<4:14:43, 81.73s/it] 26%|██▌       | 64/250 [1:34:40<4:12:50, 81.56s/it] 26%|██▌       | 65/250 [1:36:01<4:11:06, 81.44s/it] 26%|██▋       | 66/250 [1:37:22<4:09:15, 81.28s/it] 27%|██▋       | 67/250 [1:38:44<4:08:10, 81.37s/it] 27%|██▋       | 68/250 [1:40:06<4:07:20, 81.54s/it] 28%|██▊       | 69/250 [1:41:26<4:05:17, 81.31s/it] 28%|██▊       | 70/250 [1:42:48<4:04:25, 81.48s/it] 28%|██▊       | 71/250 [1:44:12<4:04:46, 82.05s/it] 29%|██▉       | 72/250 [1:45:35<4:04:31, 82.42s/it] 29%|██▉       | 73/250 [1:46:59<4:04:36, 82.92s/it] 30%|██▉       | 74/250 [1:48:21<4:02:48, 82.78s/it] 30%|███       | 75/250 [1:49:43<4:00:14, 82.37s/it] 30%|███       | 76/250 [1:51:06<3:59:12, 82.48s/it] 31%|███       | 77/250 [1:52:27<3:57:19, 82.31s/it] 31%|███       | 78/250 [1:54:25<4:25:50, 92.74s/it] 32%|███▏      | 79/250 [1:56:33<4:54:34, 103.36s/it] 32%|███▏      | 80/250 [1:58:42<5:14:42, 111.07s/it] 32%|███▏      | 81/250 [2:00:50<5:27:39, 116.33s/it] 33%|███▎      | 82/250 [2:02:59<5:35:58, 119.99s/it] 33%|███▎      | 83/250 [2:04:48<5:24:50, 116.71s/it] 34%|███▎      | 84/250 [2:06:57<5:32:50, 120.31s/it] 34%|███▍      | 85/250 [2:09:06<5:37:57, 122.90s/it] 34%|███▍      | 86/250 [2:10:48<5:18:46, 116.63s/it] 35%|███▍      | 87/250 [2:12:11<4:49:58, 106.74s/it] 35%|███▌      | 88/250 [2:13:34<4:28:32, 99.46s/it]  36%|███▌      | 89/250 [2:14:56<4:12:50, 94.23s/it] 36%|███▌      | 90/250 [2:16:16<4:00:03, 90.02s/it] 36%|███▋      | 91/250 [2:17:37<3:51:31, 87.36s/it] 37%|███▋      | 92/250 [2:18:59<3:45:50, 85.76s/it] 37%|███▋      | 93/250 [2:20:21<3:41:01, 84.47s/it] 38%|███▊      | 94/250 [2:21:42<3:37:33, 83.68s/it] 38%|███▊      | 95/250 [2:23:06<3:36:12, 83.69s/it] 38%|███▊      | 96/250 [2:24:30<3:34:40, 83.64s/it] 39%|███▉      | 97/250 [2:25:53<3:32:49, 83.46s/it] 39%|███▉      | 98/250 [2:27:54<4:00:14, 94.83s/it] 40%|███▉      | 99/250 [2:30:26<4:42:00, 112.06s/it] 40%|████      | 100/250 [2:32:59<5:10:49, 124.33s/it] 40%|████      | 101/250 [2:35:29<5:27:56, 132.06s/it] 41%|████      | 102/250 [2:38:03<5:41:39, 138.51s/it] 41%|████      | 103/250 [2:40:37<5:50:38, 143.12s/it] 42%|████▏     | 104/250 [2:43:10<5:55:34, 146.13s/it] 42%|████▏     | 105/250 [2:45:42<5:57:36, 147.98s/it] 42%|████▏     | 106/250 [2:48:15<5:58:29, 149.37s/it] 43%|████▎     | 107/250 [2:50:48<5:59:02, 150.65s/it] 43%|████▎     | 108/250 [2:53:20<5:57:25, 151.03s/it] 44%|████▎     | 109/250 [2:55:54<5:56:50, 151.85s/it] 44%|████▍     | 110/250 [2:58:16<5:47:35, 148.97s/it] 44%|████▍     | 111/250 [3:00:47<5:46:14, 149.46s/it] 45%|████▍     | 112/250 [3:02:57<5:30:25, 143.67s/it] 45%|████▌     | 113/250 [3:05:18<5:26:09, 142.84s/it] 46%|████▌     | 114/250 [3:07:41<5:23:59, 142.94s/it] 46%|████▌     | 115/250 [3:10:10<5:25:40, 144.74s/it] 46%|████▋     | 116/250 [3:11:45<4:49:42, 129.72s/it] 47%|████▋     | 117/250 [3:13:18<4:23:13, 118.75s/it] 47%|████▋     | 118/250 [3:14:51<4:04:07, 110.97s/it] 48%|████▊     | 119/250 [3:16:23<3:50:07, 105.40s/it] 48%|████▊     | 120/250 [3:17:56<3:40:03, 101.56s/it] 48%|████▊     | 121/250 [3:19:05<3:17:08, 91.69s/it]  49%|████▉     | 122/250 [3:19:59<2:51:32, 80.41s/it] 49%|████▉     | 123/250 [3:20:53<2:33:22, 72.46s/it] 50%|████▉     | 124/250 [3:21:47<2:20:35, 66.95s/it] 50%|█████     | 125/250 [3:22:40<2:11:17, 63.02s/it] 50%|█████     | 126/250 [3:23:34<2:04:33, 60.27s/it] 51%|█████     | 127/250 [3:24:28<1:59:37, 58.35s/it] 51%|█████     | 128/250 [3:25:22<1:55:53, 57.00s/it] 52%|█████▏    | 129/250 [3:26:16<1:53:00, 56.03s/it] 52%|█████▏    | 130/250 [3:27:10<1:50:45, 55.38s/it] 52%|█████▏    | 131/250 [3:28:04<1:48:56, 54.93s/it] 53%|█████▎    | 132/250 [3:28:57<1:47:17, 54.55s/it] 53%|█████▎    | 133/250 [3:29:51<1:45:57, 54.34s/it] 54%|█████▎    | 134/250 [3:30:45<1:44:45, 54.19s/it] 54%|█████▍    | 135/250 [3:31:39<1:43:42, 54.11s/it] 54%|█████▍    | 136/250 [3:32:33<1:42:44, 54.08s/it] 55%|█████▍    | 137/250 [3:33:27<1:41:45, 54.03s/it] 55%|█████▌    | 138/250 [3:34:21<1:40:45, 53.98s/it] 56%|█████▌    | 139/250 [3:35:15<1:39:50, 53.97s/it] 56%|█████▌    | 140/250 [3:36:09<1:38:56, 53.96s/it] 56%|█████▋    | 141/250 [3:37:02<1:37:57, 53.92s/it] 57%|█████▋    | 142/250 [3:37:56<1:36:48, 53.78s/it] 57%|█████▋    | 143/250 [3:38:49<1:35:30, 53.56s/it] 58%|█████▊    | 144/250 [3:39:43<1:34:42, 53.60s/it] 58%|█████▊    | 145/250 [3:40:36<1:33:38, 53.51s/it] 58%|█████▊    | 146/250 [3:41:29<1:32:37, 53.44s/it] 59%|█████▉    | 147/250 [3:42:22<1:31:36, 53.36s/it] 59%|█████▉    | 148/250 [3:43:15<1:30:37, 53.31s/it] 60%|█████▉    | 149/250 [3:44:09<1:29:36, 53.24s/it] 60%|██████    | 150/250 [3:45:02<1:28:38, 53.18s/it] 60%|██████    | 151/250 [3:45:55<1:27:37, 53.11s/it] 61%|██████    | 152/250 [3:46:47<1:26:40, 53.07s/it] 61%|██████    | 153/250 [3:47:40<1:25:45, 53.04s/it] 62%|██████▏   | 154/250 [3:48:33<1:24:51, 53.03s/it] 62%|██████▏   | 155/250 [3:49:26<1:23:51, 52.96s/it] 62%|██████▏   | 156/250 [3:50:19<1:22:56, 52.94s/it] 63%|██████▎   | 157/250 [3:51:12<1:22:01, 52.92s/it] 63%|██████▎   | 158/250 [3:52:06<1:21:26, 53.11s/it] 64%|██████▎   | 159/250 [3:53:00<1:20:55, 53.36s/it] 64%|██████▍   | 160/250 [3:53:54<1:20:20, 53.56s/it] 64%|██████▍   | 161/250 [3:54:48<1:19:37, 53.68s/it] 65%|██████▍   | 162/250 [3:55:41<1:18:49, 53.74s/it] 65%|██████▌   | 163/250 [3:56:35<1:18:00, 53.80s/it] 66%|██████▌   | 164/250 [3:57:29<1:17:12, 53.86s/it] 66%|██████▌   | 165/250 [3:58:23<1:16:19, 53.87s/it] 66%|██████▋   | 166/250 [3:59:17<1:15:30, 53.93s/it] 67%|██████▋   | 167/250 [4:00:11<1:14:33, 53.90s/it] 67%|██████▋   | 168/250 [4:01:05<1:13:39, 53.90s/it] 68%|██████▊   | 169/250 [4:01:59<1:12:48, 53.94s/it] 68%|██████▊   | 170/250 [4:02:53<1:11:54, 53.94s/it] 68%|██████▊   | 171/250 [4:03:47<1:10:59, 53.92s/it] 69%|██████▉   | 172/250 [4:04:41<1:10:07, 53.94s/it] 69%|██████▉   | 173/250 [4:05:35<1:09:12, 53.92s/it] 70%|██████▉   | 174/250 [4:06:29<1:08:17, 53.92s/it] 70%|███████   | 175/250 [4:07:23<1:07:24, 53.92s/it] 70%|███████   | 176/250 [4:08:16<1:06:29, 53.92s/it] 71%|███████   | 177/250 [4:09:10<1:05:33, 53.89s/it] 71%|███████   | 178/250 [4:10:04<1:04:39, 53.88s/it] 72%|███████▏  | 179/250 [4:10:58<1:03:44, 53.87s/it] 72%|███████▏  | 180/250 [4:11:52<1:02:51, 53.87s/it] 72%|███████▏  | 181/250 [4:12:46<1:02:01, 53.93s/it] 73%|███████▎  | 182/250 [4:13:40<1:01:11, 53.99s/it] 73%|███████▎  | 183/250 [4:14:34<1:00:17, 54.00s/it] 74%|███████▎  | 184/250 [4:15:28<59:27, 54.05s/it]   74%|███████▍  | 185/250 [4:16:22<58:31, 54.02s/it] 74%|███████▍  | 186/250 [4:17:16<57:37, 54.02s/it] 75%|███████▍  | 187/250 [4:18:10<56:42, 54.01s/it] 75%|███████▌  | 188/250 [4:19:04<55:47, 53.99s/it] 76%|███████▌  | 189/250 [4:19:58<54:52, 53.97s/it] 76%|███████▌  | 190/250 [4:20:52<53:57, 53.95s/it] 76%|███████▋  | 191/250 [4:21:46<53:01, 53.93s/it] 77%|███████▋  | 192/250 [4:22:40<52:02, 53.84s/it] 77%|███████▋  | 193/250 [4:23:33<51:09, 53.84s/it] 78%|███████▊  | 194/250 [4:24:27<50:19, 53.91s/it] 78%|███████▊  | 195/250 [4:25:21<49:25, 53.92s/it] 78%|███████▊  | 196/250 [4:26:15<48:32, 53.93s/it] 79%|███████▉  | 197/250 [4:27:10<47:51, 54.17s/it] 79%|███████▉  | 198/250 [4:28:03<46:41, 53.87s/it] 80%|███████▉  | 199/250 [4:28:56<45:36, 53.66s/it] 80%|████████  | 200/250 [4:29:50<44:36, 53.53s/it] 80%|████████  | 201/250 [4:30:43<43:35, 53.37s/it] 81%|████████  | 202/250 [4:31:36<42:38, 53.30s/it] 81%|████████  | 203/250 [4:32:29<41:39, 53.18s/it] 82%|████████▏ | 204/250 [4:33:22<40:43, 53.13s/it] 82%|████████▏ | 205/250 [4:34:15<39:48, 53.08s/it] 82%|████████▏ | 206/250 [4:35:08<38:54, 53.05s/it] 83%|████████▎ | 207/250 [4:36:01<38:03, 53.09s/it] 83%|████████▎ | 208/250 [4:36:54<37:10, 53.11s/it] 84%|████████▎ | 209/250 [4:37:47<36:20, 53.18s/it] 84%|████████▍ | 210/250 [4:38:41<35:28, 53.20s/it] 84%|████████▍ | 211/250 [4:39:34<34:35, 53.21s/it] 85%|████████▍ | 212/250 [4:40:27<33:44, 53.28s/it] 85%|████████▌ | 213/250 [4:41:21<32:55, 53.39s/it] 86%|████████▌ | 214/250 [4:42:15<32:05, 53.48s/it] 86%|████████▌ | 215/250 [4:43:08<31:14, 53.55s/it] 86%|████████▋ | 216/250 [4:44:02<30:25, 53.68s/it] 87%|████████▋ | 217/250 [4:44:56<29:35, 53.81s/it] 87%|████████▋ | 218/250 [4:45:50<28:44, 53.88s/it] 88%|████████▊ | 219/250 [4:46:44<27:51, 53.92s/it] 88%|████████▊ | 220/250 [4:47:38<26:58, 53.94s/it] 88%|████████▊ | 221/250 [4:48:32<26:03, 53.92s/it] 89%|████████▉ | 222/250 [4:49:26<25:09, 53.90s/it] 89%|████████▉ | 223/250 [4:50:20<24:15, 53.90s/it] 90%|████████▉ | 224/250 [4:51:14<23:22, 53.92s/it] 90%|█████████ | 225/250 [4:52:08<22:28, 53.93s/it] 90%|█████████ | 226/250 [4:53:02<21:35, 53.97s/it] 91%|█████████ | 227/250 [4:53:56<20:41, 53.98s/it] 91%|█████████ | 228/250 [4:54:50<19:47, 53.98s/it] 92%|█████████▏| 229/250 [4:55:44<18:53, 53.98s/it] 92%|█████████▏| 230/250 [4:56:38<17:57, 53.90s/it] 92%|█████████▏| 231/250 [4:57:31<17:00, 53.72s/it] 93%|█████████▎| 232/250 [4:58:24<16:03, 53.51s/it] 93%|█████████▎| 233/250 [4:59:18<15:10, 53.58s/it] 94%|█████████▎| 234/250 [5:00:12<14:18, 53.69s/it] 94%|█████████▍| 235/250 [5:01:05<13:24, 53.64s/it] 94%|█████████▍| 236/250 [5:01:59<12:30, 53.63s/it] 95%|█████████▍| 237/250 [5:02:52<11:36, 53.54s/it] 95%|█████████▌| 238/250 [5:03:46<10:42, 53.52s/it] 96%|█████████▌| 239/250 [5:04:39<09:47, 53.45s/it] 96%|█████████▌| 240/250 [5:05:32<08:54, 53.44s/it] 96%|█████████▋| 241/250 [5:06:26<08:00, 53.44s/it] 97%|█████████▋| 242/250 [5:07:19<07:07, 53.46s/it] 97%|█████████▋| 243/250 [5:08:13<06:14, 53.44s/it] 98%|█████████▊| 244/250 [5:09:06<05:20, 53.45s/it] 98%|█████████▊| 245/250 [5:09:59<04:27, 53.40s/it] 98%|█████████▊| 246/250 [5:10:53<03:33, 53.43s/it] 99%|█████████▉| 247/250 [5:11:46<02:40, 53.45s/it] 99%|█████████▉| 248/250 [5:12:40<01:47, 53.55s/it]100%|█████████▉| 249/250 [5:13:34<00:53, 53.67s/it]100%|██████████| 250/250 [5:14:28<00:00, 53.78s/it]100%|██████████| 250/250 [5:14:28<00:00, 75.47s/it]
+Epoch: 1, Train Loss: 3.028, Train Acc: 20.614, Test Loss: 3.595, Test Acc: 4.052
+Best test accuracy:  4.051863857374392
+Epoch 00005: reducing learning rate of group 0 to 4.5000e-03.
+Epoch: 6, Train Loss: 3.452, Train Acc: 9.032, Test Loss: 3.616, Test Acc: 4.052
+Best test accuracy:  4.051863857374392
+Epoch 00009: reducing learning rate of group 0 to 4.0500e-03.
+Epoch: 11, Train Loss: 3.453, Train Acc: 9.032, Test Loss: 3.617, Test Acc: 4.052
+Best test accuracy:  4.051863857374392
+Epoch 00013: reducing learning rate of group 0 to 3.6450e-03.
+Epoch: 16, Train Loss: 3.452, Train Acc: 9.032, Test Loss: 3.618, Test Acc: 4.052
+Best test accuracy:  4.051863857374392
+Epoch 00017: reducing learning rate of group 0 to 3.2805e-03.
+Epoch: 21, Train Loss: 3.451, Train Acc: 9.032, Test Loss: 3.610, Test Acc: 4.052
+Best test accuracy:  4.659643435980551
+Epoch 00021: reducing learning rate of group 0 to 2.9525e-03.
+Epoch: 26, Train Loss: 3.452, Train Acc: 9.032, Test Loss: 3.607, Test Acc: 4.052
+Best test accuracy:  7.576985413290114
+Epoch 00027: reducing learning rate of group 0 to 2.6572e-03.
+Epoch: 31, Train Loss: 3.450, Train Acc: 9.032, Test Loss: 3.619, Test Acc: 4.052
+Best test accuracy:  7.576985413290114
+Epoch 00031: reducing learning rate of group 0 to 2.3915e-03.
+Epoch 00035: reducing learning rate of group 0 to 2.1523e-03.
+Epoch: 36, Train Loss: 3.449, Train Acc: 9.032, Test Loss: 3.606, Test Acc: 4.052
+Best test accuracy:  7.576985413290114
+Epoch 00039: reducing learning rate of group 0 to 1.9371e-03.
+Epoch: 41, Train Loss: 3.450, Train Acc: 9.032, Test Loss: 3.617, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00043: reducing learning rate of group 0 to 1.7434e-03.
+Epoch: 46, Train Loss: 3.450, Train Acc: 9.032, Test Loss: 3.611, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00047: reducing learning rate of group 0 to 1.5691e-03.
+Epoch: 51, Train Loss: 3.450, Train Acc: 9.032, Test Loss: 3.615, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00051: reducing learning rate of group 0 to 1.4121e-03.
+Epoch 00055: reducing learning rate of group 0 to 1.2709e-03.
+Epoch: 56, Train Loss: 3.448, Train Acc: 9.032, Test Loss: 3.608, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00059: reducing learning rate of group 0 to 1.1438e-03.
+Epoch: 61, Train Loss: 3.448, Train Acc: 9.032, Test Loss: 3.611, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00063: reducing learning rate of group 0 to 1.0295e-03.
+Epoch: 66, Train Loss: 3.449, Train Acc: 9.032, Test Loss: 3.609, Test Acc: 4.052
+Best test accuracy:  15.80226904376013
+Epoch 00067: reducing learning rate of group 0 to 9.2651e-04.
+Epoch: 71, Train Loss: 2.942, Train Acc: 17.942, Test Loss: 3.001, Test Acc: 16.086
+Best test accuracy:  16.085899513776337
+Epoch: 76, Train Loss: 1.536, Train Acc: 54.871, Test Loss: 1.567, Test Acc: 51.094
+Best test accuracy:  51.09400324149109
+Epoch: 81, Train Loss: 1.060, Train Acc: 68.292, Test Loss: 1.433, Test Acc: 59.522
+Best test accuracy:  64.87034035656401
+Epoch: 86, Train Loss: 0.850, Train Acc: 74.652, Test Loss: 0.839, Test Acc: 75.486
+Best test accuracy:  75.48622366288492
+Epoch: 91, Train Loss: 0.712, Train Acc: 78.127, Test Loss: 0.783, Test Acc: 77.431
+Best test accuracy:  77.43111831442464
+Epoch: 96, Train Loss: 0.618, Train Acc: 81.103, Test Loss: 0.771, Test Acc: 78.160
+Best test accuracy:  80.38897893030794
+Epoch 00099: reducing learning rate of group 0 to 8.3386e-04.
+Epoch: 101, Train Loss: 0.532, Train Acc: 83.440, Test Loss: 0.640, Test Acc: 81.848
+Best test accuracy:  81.84764991896272
+Epoch: 106, Train Loss: 0.492, Train Acc: 84.161, Test Loss: 0.550, Test Acc: 83.874
+Best test accuracy:  83.87358184764992
+Epoch 00110: reducing learning rate of group 0 to 7.5047e-04.
+Epoch: 111, Train Loss: 0.450, Train Acc: 85.787, Test Loss: 0.555, Test Acc: 83.712
+Best test accuracy:  83.87358184764992
+Epoch: 116, Train Loss: 0.432, Train Acc: 86.224, Test Loss: 0.585, Test Acc: 83.671
+Best test accuracy:  85.21069692058347
+Epoch: 121, Train Loss: 0.421, Train Acc: 86.559, Test Loss: 0.604, Test Acc: 82.861
+Best test accuracy:  86.18314424635332
+Epoch 00121: reducing learning rate of group 0 to 6.7543e-04.
+Epoch: 126, Train Loss: 0.382, Train Acc: 87.931, Test Loss: 0.492, Test Acc: 85.373
+Best test accuracy:  86.18314424635332
+Epoch 00126: reducing learning rate of group 0 to 6.0788e-04.
+Epoch 00130: reducing learning rate of group 0 to 5.4709e-04.
+Epoch: 131, Train Loss: 0.337, Train Acc: 88.865, Test Loss: 0.508, Test Acc: 86.548
+Best test accuracy:  86.58833063209076
+Epoch: 136, Train Loss: 0.348, Train Acc: 88.499, Test Loss: 0.521, Test Acc: 85.535
+Best test accuracy:  86.58833063209076
+Epoch 00136: reducing learning rate of group 0 to 4.9239e-04.
+Epoch: 141, Train Loss: 0.302, Train Acc: 89.983, Test Loss: 0.496, Test Acc: 85.332
+Best test accuracy:  87.7228525121556
+Epoch 00141: reducing learning rate of group 0 to 4.4315e-04.
+Epoch 00145: reducing learning rate of group 0 to 3.9883e-04.
+Epoch: 146, Train Loss: 0.283, Train Acc: 90.602, Test Loss: 0.451, Test Acc: 87.601
+Best test accuracy:  87.7228525121556
+Epoch: 151, Train Loss: 0.283, Train Acc: 90.501, Test Loss: 0.509, Test Acc: 87.034
+Best test accuracy:  87.7228525121556
+Epoch 00154: reducing learning rate of group 0 to 3.5895e-04.
+Epoch: 156, Train Loss: 0.251, Train Acc: 91.568, Test Loss: 0.485, Test Acc: 86.588
+Best test accuracy:  87.7228525121556
+Epoch 00159: reducing learning rate of group 0 to 3.2305e-04.
+Epoch: 161, Train Loss: 0.246, Train Acc: 91.872, Test Loss: 0.456, Test Acc: 86.872
+Best test accuracy:  88.04700162074555
+Epoch 00163: reducing learning rate of group 0 to 2.9075e-04.
+Epoch: 166, Train Loss: 0.564, Train Acc: 82.983, Test Loss: 0.471, Test Acc: 86.548
+Best test accuracy:  88.04700162074555
+Epoch 00167: reducing learning rate of group 0 to 2.6167e-04.
+Epoch: 171, Train Loss: 0.255, Train Acc: 91.547, Test Loss: 0.421, Test Acc: 88.371
+Best test accuracy:  88.3711507293355
+Epoch: 176, Train Loss: 0.235, Train Acc: 91.811, Test Loss: 0.438, Test Acc: 87.156
+Best test accuracy:  88.3711507293355
+Epoch 00178: reducing learning rate of group 0 to 2.3551e-04.
+Epoch: 181, Train Loss: 0.222, Train Acc: 92.360, Test Loss: 0.443, Test Acc: 87.763
+Best test accuracy:  88.3711507293355
+Epoch 00183: reducing learning rate of group 0 to 2.1196e-04.
+Epoch: 186, Train Loss: 0.190, Train Acc: 93.437, Test Loss: 0.417, Test Acc: 88.006
+Best test accuracy:  88.3711507293355
+Epoch 00187: reducing learning rate of group 0 to 1.9076e-04.
+Epoch: 191, Train Loss: 0.198, Train Acc: 93.234, Test Loss: 0.436, Test Acc: 88.250
+Best test accuracy:  88.3711507293355
+Epoch 00191: reducing learning rate of group 0 to 1.7168e-04.
+Epoch 00195: reducing learning rate of group 0 to 1.5452e-04.
+Epoch: 196, Train Loss: 0.182, Train Acc: 93.650, Test Loss: 0.445, Test Acc: 88.331
+Best test accuracy:  88.73581847649919
+Epoch: 201, Train Loss: 0.173, Train Acc: 93.782, Test Loss: 0.465, Test Acc: 88.006
+Best test accuracy:  88.73581847649919
+Epoch 00202: reducing learning rate of group 0 to 1.3906e-04.
+Epoch: 206, Train Loss: 0.210, Train Acc: 92.888, Test Loss: 0.453, Test Acc: 88.006
+Best test accuracy:  88.73581847649919
+Epoch 00206: reducing learning rate of group 0 to 1.2516e-04.
+Epoch 00210: reducing learning rate of group 0 to 1.1264e-04.
+Epoch: 211, Train Loss: 0.176, Train Acc: 93.904, Test Loss: 0.433, Test Acc: 87.561
+Best test accuracy:  88.73581847649919
+Epoch 00214: reducing learning rate of group 0 to 1.0138e-04.
+Epoch: 216, Train Loss: 0.157, Train Acc: 94.555, Test Loss: 0.444, Test Acc: 88.128
+Best test accuracy:  88.73581847649919
+Epoch 00218: reducing learning rate of group 0 to 9.1240e-05.
+Epoch: 221, Train Loss: 0.157, Train Acc: 94.494, Test Loss: 0.431, Test Acc: 88.857
+Best test accuracy:  88.85737439222042
+Epoch 00222: reducing learning rate of group 0 to 8.2116e-05.
+Epoch: 226, Train Loss: 0.142, Train Acc: 94.961, Test Loss: 0.432, Test Acc: 88.614
+Best test accuracy:  88.85737439222042
+Epoch 00226: reducing learning rate of group 0 to 7.3904e-05.
+Epoch 00230: reducing learning rate of group 0 to 6.6514e-05.
+Epoch: 231, Train Loss: 0.133, Train Acc: 95.174, Test Loss: 0.447, Test Acc: 87.804
+Best test accuracy:  89.10048622366288
+Epoch 00234: reducing learning rate of group 0 to 5.9863e-05.
+Epoch: 236, Train Loss: 0.136, Train Acc: 95.215, Test Loss: 0.436, Test Acc: 88.614
+Best test accuracy:  89.42463533225283
+Epoch 00238: reducing learning rate of group 0 to 5.3876e-05.
+Epoch: 241, Train Loss: 0.128, Train Acc: 95.550, Test Loss: 0.456, Test Acc: 88.533
+Best test accuracy:  89.42463533225283
+Epoch 00242: reducing learning rate of group 0 to 4.8489e-05.
+Epoch: 246, Train Loss: 0.127, Train Acc: 95.560, Test Loss: 0.431, Test Acc: 89.182
+Best test accuracy:  89.42463533225283
+Epoch 00246: reducing learning rate of group 0 to 4.3640e-05.
+Epoch 00250: reducing learning rate of group 0 to 3.9276e-05.
+training time 314.0  minutes
