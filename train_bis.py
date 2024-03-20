@@ -24,7 +24,7 @@ def train(model, device, train_loader, test_loader=None, epochs=100, batch_size 
     print("optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=1e-4)")
     #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[120,160], gamma=0.1)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)
-    print("    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)")
+    print("\t scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=3, verbose=True, min_lr=1e-5)")
     best_test_acc = 0
     model_path = model_path
 

@@ -55,6 +55,7 @@ if __name__ == '__main__':
     model = PointTransformerModel(nblocks=5)
     print(model)
     batch_size, N, input_dim = 16, 1024, 6
+    print('batch_size=',batch_size)
     features = torch.rand((batch_size, N, input_dim))
     output = model(features)
     print(output.shape)
