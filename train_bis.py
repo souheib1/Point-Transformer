@@ -120,7 +120,7 @@ if __name__ == "__main__":
     print("batch_size=",batch_size)
     model = PointTransformerModel(input_dim=6,nblocks=5,sampling='density').to(device)
     t0 = time.time()
-    print("load the data")
+    print("loading the data")
     train_loader, test_loader = data_loaders(ROOT_DIR="./data/modelnet40_normal_resampled/",batch_size=batch_size)
     
     train(model, device, train_loader=train_loader, 

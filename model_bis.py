@@ -20,6 +20,7 @@ class PointTransformerModel(nn.Module):
         
         self.transformer_initial = PointTransformerLayer(32, 64, k)
         
+        
         self.down_blocks = nn.ModuleList([TransitionDownLayer(npoints // 4 ** i, 
                                                               k, 
                                                               32 * 2 ** i // 2, 
@@ -27,9 +28,11 @@ class PointTransformerModel(nn.Module):
                                                               pooling=self.pooling,
                                                               sampling=self.sampling) for i in range(1, nblocks + 1)])
         
+        
         self.transformer_blocks = nn.ModuleList([PointTransformerLayer(32 * 2 ** i, 
                                                                        64, 
                                                                        k) for i in range(1, nblocks + 1)])
+        
         
         self.MLP2 = nn.Sequential(
             nn.Linear(32*2**nblocks, 256),
