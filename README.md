@@ -1,6 +1,6 @@
 # Point Transformer
 
-This is an unofficial comprehensive implementation of Point Transformer, a pioneering deep-learning technique for 3D data processing introduced by Zhao et al. (2021) [1]. It served as the culmination of the 3D Point Cloud and Modeling course within the MVA Master program. 
+This is an unofficial comprehensive implementation of Point Transformer, a pioneering deep-learning technique for 3D data processing introduced by Zhao et al. (2021) [1]. 
 
 ## Data
 
